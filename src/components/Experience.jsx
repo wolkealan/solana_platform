@@ -1,9 +1,6 @@
+// src/components/Experience.jsx
 import React, { useState, useEffect } from 'react';
-import {
-  ContactShadows,
-  Grid,
-  Environment,
-} from '@react-three/drei';
+import { ContactShadows, Grid, Environment } from '@react-three/drei';
 import { Physics, RigidBody, CuboidCollider } from '@react-three/rapier';
 import { ConvaiFPS } from './fps/convaiFPS';
 import { Anita } from './models/Anita';
@@ -27,33 +24,17 @@ export const Experience = ({ client, characterType, walletAddress, onLockChange 
       if (walletAddress) {
         try {
           const friendsData = await getFriends(walletAddress);
+          console.log('Loaded friends:', friendsData);
           setFriends(friendsData);
         } catch (error) {
-          console.error("Failed to load friends:", error);
+          console.error('Failed to load friends:', error);
         }
       }
     };
-    
-    loadFriends();
-    
-    const unsubscribe = friendEvents.subscribe(loadFriends);
-    
-    return () => unsubscribe();
-  }, [walletAddress]);
 
-  useEffect(() => {
-    const loadFriends = async () => {
-      if (walletAddress) {
-        try {
-          const friendsData = await getFriends(walletAddress);
-          setFriends(friendsData);
-        } catch (error) {
-          console.error("Failed to load friends:", error);
-        }
-      }
-    };
-    
     loadFriends();
+    const unsubscribe = friendEvents.subscribe(loadFriends);
+    return () => unsubscribe();
   }, [walletAddress]);
 
   const handleLockChange = (locked) => {
@@ -62,22 +43,24 @@ export const Experience = ({ client, characterType, walletAddress, onLockChange 
   };
 
   const renderCharacter = () => {
-    console.log("Rendering character:", characterType);
-    
-    switch(characterType) {
+    console.log('Rendering character:', characterType);
+    switch (characterType) {
       case 'rpm':
         return <DualAnimatedCharacter client={client} position={[0, 0, 0]} />;
       case 'anita':
         return <Anita client={client} position={[0, 0, 0]} />;
       default:
-        console.warn("Unknown character type:", characterType);
+        console.warn('Unknown character type:', characterType);
         return <DualAnimatedCharacter client={client} position={[0, 0, 0]} />;
     }
   };
-  
+
   const positionFriend = (index, total) => {
-    const radius = 5;
-    const angle = (index / total) * Math.PI * 1.5;
+    const radius = total > 1 ? 5 : 3;
+    const minAngle = Math.PI / 6;
+    const maxSpread = Math.PI * 1.5;
+    const angleStep = Math.min(maxSpread / Math.max(1, total - 1), minAngle);
+    const angle = (index * angleStep) - (maxSpread / 2);
     const x = Math.cos(angle) * radius;
     const z = Math.sin(angle) * radius;
     return [x, 0, z];
@@ -104,7 +87,7 @@ export const Experience = ({ client, characterType, walletAddress, onLockChange 
         {renderCharacter()}
         
         {friends.map((friend, index) => (
-          <FriendCharacter 
+          <FriendCharacter
             key={friend.walletAddress}
             friendData={friend}
             position={positionFriend(index, friends.length)}
@@ -113,7 +96,7 @@ export const Experience = ({ client, characterType, walletAddress, onLockChange 
         
         <Environment
           background
-          files="/assets/golden_bay_2k.exr" // Ensure this path is correct
+          files="/assets/golden_bay_2k.exr"
           ground={{
             height: 10,
             radius: 50,

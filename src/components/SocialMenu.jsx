@@ -29,7 +29,7 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
   const [unreadMessages, setUnreadMessages] = useState({});
 
   useEffect(() => {
-    console.log('isPointerLocked:', isPointerLocked); // Debug log
+    console.log('isPointerLocked:', isPointerLocked);
     const fetchPendingCount = async () => {
       try {
         const requests = await getPendingRequests(walletAddress);
@@ -42,10 +42,12 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
     const fetchUnreadMessages = async () => {
       try {
         const conversations = await getAllConversations(walletAddress);
+        console.log('Fetched conversations:', conversations);
         const unreadCounts = {};
         for (const convo of conversations) {
-          if (convo.unreadCount > 0) {
-            unreadCounts[convo.friend.walletAddress] = convo.unreadCount;
+          const friendWallet = convo.senderWallet === walletAddress ? convo.receiverWallet : convo.senderWallet;
+          if (!unreadCounts[friendWallet] && !convo.read) {
+            unreadCounts[friendWallet] = (unreadCounts[friendWallet] || 0) + 1;
           }
         }
         setUnreadMessages(unreadCounts);
@@ -68,7 +70,11 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
   };
 
   const openChat = (friend) => {
-    console.log('SocialMenu openChat called with:', friend);
+    console.log('openChat called with friend:', friend);
+    if (!friend || !friend.walletAddress) {
+      console.error('Invalid friend object:', friend);
+      return;
+    }
     if (!activeChats.find(chat => chat.walletAddress === friend.walletAddress)) {
       setActiveChats([...activeChats, friend]);
       markMessagesAsRead(walletAddress, friend.walletAddress).then(() => {

@@ -1,86 +1,105 @@
 // src/components/ChatWindow.jsx
-import React, { useState, useEffect, useRef } from 'react';
-import { sendMessage, getConversation, markMessagesAsRead } from '../services/messageService';
+import React, { useState, useEffect } from 'react';
+import { getConversation, sendMessage } from '../services/messageService';
 import '../styles/ChatWindow.css';
 
 const ChatWindow = ({ walletAddress, friend, onClose }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
-  const [error, setError] = useState(null);
-  const messagesEndRef = useRef(null);
+  const [loading, setLoading] = useState(true); // Only true for initial load
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchConversation = async () => {
+    let isMounted = true; // To prevent state updates on unmounted component
+
+    const fetchMessages = async (initial = false) => {
+      if (!friend || !friend.walletAddress) {
+        console.error('Invalid friend object in ChatWindow:', friend);
+        if (isMounted && initial) setLoading(false);
+        return;
+      }
+
+      if (initial) setLoading(true); // Set loading only for initial fetch
+
       try {
-        console.log(`Fetching conversation for ${walletAddress} with ${friend.walletAddress}`);
         const conversation = await getConversation(walletAddress, friend.walletAddress);
-        console.log('Conversation data:', conversation);
-        setMessages(conversation);
-        await markMessagesAsRead(walletAddress, friend.walletAddress);
+        if (isMounted) {
+          setMessages(conversation || []);
+          if (initial) setLoading(false); // Only set loading to false on initial success
+          setError(''); // Clear error on success
+        }
       } catch (err) {
-        console.error('Failed to load conversation:', err);
-        setError('Failed to load conversation. Check console for details.');
+        console.error('Error in fetchMessages:', err.message, err.response?.data);
+        if (isMounted) {
+          setError('Failed to load messages');
+          if (initial) setLoading(false); // Only set loading to false on initial failure
+        }
       }
     };
 
-    fetchConversation();
-    const interval = setInterval(fetchConversation, 5000);
-    return () => clearInterval(interval);
-  }, [walletAddress, friend.walletAddress]);
+    fetchMessages(true); // Initial fetch with loading
+    const interval = setInterval(() => fetchMessages(false), 5000); // Polling without loading
 
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [walletAddress, friend.walletAddress]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !friend.walletAddress) return;
 
     try {
-      console.log(`Sending message from ${walletAddress} to ${friend.walletAddress}: ${newMessage}`);
-      const message = await sendMessage(walletAddress, friend.walletAddress, newMessage);
-      setMessages([...messages, message]);
+      await sendMessage(walletAddress, friend.walletAddress, newMessage);
       setNewMessage('');
+      const updatedMessages = await getConversation(walletAddress, friend.walletAddress);
+      setMessages(updatedMessages || []);
     } catch (err) {
-      console.error('Failed to send message:', err);
-      setError('Failed to send message. Check console for details.');
+      setError('Failed to send message');
     }
   };
 
   return (
     <div className="chat-window">
       <div className="chat-header">
-        <h3>{friend.username || friend.walletAddress}</h3>
+        <h3>{friend.username || 'Unknown'}</h3>
         <button className="close-btn" onClick={onClose}>×</button>
       </div>
       <div className="chat-messages">
-        {error && <p className="error-message">{error}</p>}
-        {messages.length === 0 ? (
-          <p className="no-messages">No messages yet. Start the conversation!</p>
+        {loading ? (
+          <p>Loading messages...</p>
+        ) : error ? (
+          <p className="error-message">{error}</p>
+        ) : messages.length === 0 ? (
+          <p>No messages yet</p>
         ) : (
-          messages.map((msg) => (
+          messages.map((msg, index) => (
             <div
-              key={msg._id}
+              key={index}
               className={`message ${msg.senderWallet === walletAddress ? 'sent' : 'received'}`}
             >
-              <div className="message-content">
-                <p>{msg.content}</p>
-                <span>{new Date(msg.createdAt).toLocaleString()}</span>
-              </div>
+              <p>{msg.content}</p>
+              <span>
+                {new Date(msg.createdAt).toLocaleTimeString([], {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                })}
+              </span>
             </div>
           ))
         )}
-        <div ref={messagesEndRef} />
       </div>
-      <form onSubmit={handleSendMessage} className="chat-input-form">
+      <form className="chat-input-form" onSubmit={handleSendMessage}>
         <input
-          type="text"
+          className="chat-input"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type a message..."
-          className="chat-input"
         />
-        <button type="submit" className="send-btn">Send</button>
+        <button className="send-btn" type="submit">
+          Send
+        </button>
       </form>
     </div>
   );
