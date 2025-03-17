@@ -3,7 +3,6 @@ import { Canvas } from '@react-three/fiber';
 import { KeyboardControls, Loader } from '@react-three/drei';
 import { Experience } from './components/Experience';
 import { CharacterSelection } from './components/CharacterSelection';
-import ChatBubble from './components/chat/Chat';
 import { useConvaiClient } from './hooks/useConvaiClient';
 import './styles/WalletStyles.css';
 import { getUserByWallet, registerUser, updateUserCharacter } from './services/userService';
@@ -22,7 +21,6 @@ function App() {
   
   const { client } = useConvaiClient('characterId', 'apikey');
   
-  // Check if user exists when wallet is connected
   useEffect(() => {
     if (walletConnected && walletAddress) {
       const checkUserExists = async () => {
@@ -31,7 +29,6 @@ function App() {
           setUser(userData);
           setSelectedCharacter(userData.character);
         } catch (error) {
-          // User doesn't exist, we'll need to register
           setIsRegistering(true);
         }
       };
@@ -40,11 +37,10 @@ function App() {
     }
   }, [walletConnected, walletAddress]);
   
-  // Handle manual wallet address submission
   const handleWalletSubmit = (e) => {
     e.preventDefault();
     
-    if (walletAddress.trim().length >= 32) { // Simple validation for Solana address length
+    if (walletAddress.trim().length >= 32) {
       console.log("Wallet address submitted:", walletAddress);
       setWalletConnected(true);
     } else {
@@ -52,7 +48,6 @@ function App() {
     }
   };
   
-  // Handle user registration
   const handleRegistration = async (e) => {
     e.preventDefault();
     
@@ -74,12 +69,10 @@ function App() {
     console.log("Character selected:", characterId);
     setSelectedCharacter(characterId);
     
-    // If user is registering, don't proceed yet
     if (isRegistering) {
       return;
     }
     
-    // If user exists, update their character preference
     if (user) {
       const updateCharacter = async () => {
         try {
@@ -94,7 +87,6 @@ function App() {
     }
   };
   
-  // Manual wallet entry component
   const ManualWalletEntry = () => (
     <div className="wallet-connection-container">
       <h1>Welcome to Virtual World</h1>
@@ -117,7 +109,6 @@ function App() {
     </div>
   );
   
-  // Registration component
   const UserRegistration = React.memo(() => {
     const [localUsername, setLocalUsername] = useState(username);
     
@@ -164,18 +155,14 @@ function App() {
   
   return (
     <>
-      {/* Show manual wallet entry if not connected */}
       {!walletConnected && <ManualWalletEntry />}
       
-      {/* Show registration if needed */}
       {walletConnected && isRegistering && <UserRegistration />}
       
-      {/* Show character selection if wallet connected but no character selected */}
       {walletConnected && !isRegistering && !selectedCharacter && (
         <CharacterSelection onCharacterSelected={handleCharacterSelected} />
       )}
       
-      {/* Show 3D scene after character selection */}
       {walletConnected && !isRegistering && selectedCharacter && (
         <>
           <KeyboardControls
@@ -206,10 +193,8 @@ function App() {
             <Loader />
           </KeyboardControls>
           
-          <SocialMenu walletAddress={walletAddress} />
-          
-          <ChatBubble 
-            client={client} 
+          <SocialMenu 
+            walletAddress={walletAddress} 
             isPointerLocked={isPointerLocked}
           />
         </>

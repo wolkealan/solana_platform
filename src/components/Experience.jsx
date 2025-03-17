@@ -3,7 +3,6 @@ import {
   ContactShadows,
   Grid,
   Sky,
-  Stats,
 } from '@react-three/drei';
 import { Physics, RigidBody, CuboidCollider } from '@react-three/rapier';
 import { ConvaiFPS } from './fps/convaiFPS';
@@ -22,7 +21,6 @@ export const Experience = ({ client, characterType, walletAddress, onLockChange 
     setGravity([0, -9.81, 0]);
   }, []);
 
-  // Inside Experience component
   useEffect(() => {
     const loadFriends = async () => {
       if (walletAddress) {
@@ -37,13 +35,11 @@ export const Experience = ({ client, characterType, walletAddress, onLockChange 
     
     loadFriends();
     
-    // Subscribe to friend updates
     const unsubscribe = friendEvents.subscribe(loadFriends);
     
     return () => unsubscribe();
   }, [walletAddress]);
 
-  // Fetch friends when component mounts
   useEffect(() => {
     const loadFriends = async () => {
       if (walletAddress) {
@@ -59,13 +55,11 @@ export const Experience = ({ client, characterType, walletAddress, onLockChange 
     loadFriends();
   }, [walletAddress]);
 
-  // Handle lock state changes
   const handleLockChange = (locked) => {
     setIsLocked(locked);
-    onLockChange?.(locked); // Notify parent component (App)
+    onLockChange?.(locked);
   };
 
-  // Render different character based on selection
   const renderCharacter = () => {
     console.log("Rendering character:", characterType);
     
@@ -80,10 +74,9 @@ export const Experience = ({ client, characterType, walletAddress, onLockChange 
     }
   };
   
-  // Position friends in a semi-circle around the player
   const positionFriend = (index, total) => {
-    const radius = 5; // Distance from center
-    const angle = (index / total) * Math.PI * 1.5; // Spread in a semi-circle
+    const radius = 5;
+    const angle = (index / total) * Math.PI * 1.5;
     const x = Math.cos(angle) * radius;
     const z = Math.sin(angle) * radius;
     return [x, 0, z];
@@ -91,7 +84,6 @@ export const Experience = ({ client, characterType, walletAddress, onLockChange 
 
   return (
     <>
-      {/* lights */}
       <ambientLight intensity={0.2} />
       <hemisphereLight
         skyColor={'#fcf9d9'}
@@ -106,13 +98,10 @@ export const Experience = ({ client, characterType, walletAddress, onLockChange 
         castShadow
       />
 
-      {/* models */}
-      <Stats />
       <Physics gravity={gravity}>
         <ConvaiFPS onLockChange={handleLockChange} />
         {renderCharacter()}
         
-        {/* Render friends */}
         {friends.map((friend, index) => (
           <FriendCharacter 
             key={friend.walletAddress}
