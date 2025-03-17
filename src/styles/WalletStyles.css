@@ -1,0 +1,67 @@
+/* src/styles/WalletStyles.css
+.wallet-connection-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(20, 20, 25, 0.95);
+    color: white;
+    z-index: 100;
+  }
+  
+  .wallet-connection-container h1 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .wallet-button-wrapper {
+    margin: 1.5rem 0;
+  }
+  
+  .wallet-connection-container p {
+    opacity: 0.8;
+  } */
+
+
+  /* Add to src/styles/WalletStyles.css */
+.wallet-entry-form {
+    width: 100%;
+    max-width: 500px;
+    margin: 1rem 0;
+  }
+  
+  .wallet-entry-form form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .wallet-input {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(40, 40, 45, 0.8);
+    color: white;
+    width: 100%;
+  }
+  
+  .wallet-submit-btn {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: none;
+    background-color: #4f46e5;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .wallet-submit-btn:hover {
+    background-color: #6366f1;
+  }

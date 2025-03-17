@@ -1,0 +1,67 @@
+/* src/styles/CharacterSelection.css */
+.character-selection-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(20, 20, 25, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.character-selection-container {
+  background-color: rgba(40, 40, 45, 0.8);
+  border-radius: 12px;
+  padding: 2rem;
+  width: 80%;
+  max-width: 800px;
+}
+
+.character-selection-container h2 {
+  text-align: center;
+  color: white;
+  font-size: 2rem;
+  margin-bottom: 2rem;
+}
+
+.character-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.character-card {
+  background-color: rgba(60, 60, 65, 0.8);
+  border-radius: 8px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s, background-color 0.2s;
+  text-align: center;
+}
+
+.character-card:hover {
+  transform: scale(1.03);
+  background-color: rgba(80, 80, 85, 0.8);
+}
+
+.character-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.character-card h3 {
+  color: white;
+  font-size: 1.2rem;
+}
+
+.character-card.selected {
+  border: 3px solid #4caf50;
+  box-shadow: 0 0 15px rgba(76, 175, 80, 0.6);
+  transform: scale(1.05);
+}

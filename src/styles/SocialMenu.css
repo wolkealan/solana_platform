@@ -1,0 +1,57 @@
+.social-menu-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 999;
+  }
+  
+  .social-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .social-btn {
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+    position: relative;
+  }
+  
+  .social-btn.active {
+    background-color: rgba(0, 0, 0, 0.9);
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+  }
+  
+  .notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #f44336;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  @media (max-width: 768px) {
+    .social-menu-container {
+      top: 10px;
+      right: 10px;
+    }
+    
+    .social-buttons {
+      gap: 5px;
+    }
+    
+    .social-btn {
+      padding: 6px 10px;
+      font-size: 14px;
+    }
+  }
