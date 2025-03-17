@@ -27,11 +27,14 @@ export const respondToFriendRequest = async (connectionId, status) => {
 export const getPendingRequests = async (walletAddress) => {
   try {
     const response = await api.get(`/connections/pending/${walletAddress}`);
-    return response.data;
+    return response.data || [];
   } catch (error) {
-    throw error.response?.data || { message: 'Error connecting to server' };
+    console.error('Error fetching pending requests:', error.message, error.response?.data);
+    throw error.response?.data || { message: 'Error fetching pending requests' };
   }
 };
+
+
 
 // Get all friends
 export const getFriends = async (walletAddress) => {

@@ -1,42 +1,28 @@
+// server/routes/userRoutes.js
 const express = require('express');
+const User = require('../models/userModel'); // Corrected path and filename
 const router = express.Router();
-const User = require('../models/userModel');
 
 // Register a new user
 router.post('/register', async (req, res) => {
+  const { walletAddress, username, character } = req.body;
+
   try {
-    const { walletAddress, username, character } = req.body;
-    
-    // Check if wallet already exists
-    const walletExists = await User.findOne({ walletAddress });
-    if (walletExists) {
-      return res.status(400).json({ message: 'Wallet already registered' });
+    const existingUser = await User.findOne({ walletAddress });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
     }
-    
-    // Check if username already exists
-    const usernameExists = await User.findOne({ username });
-    if (usernameExists) {
+
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
       return res.status(400).json({ message: 'Username already taken' });
     }
-    
-    // Create user
-    const user = await User.create({
-      walletAddress,
-      username,
-      character
-    });
-    
-    if (user) {
-      res.status(201).json({
-        walletAddress: user.walletAddress,
-        username: user.username,
-        character: user.character
-      });
-    } else {
-      res.status(400).json({ message: 'Invalid user data' });
-    }
+
+    const user = new User({ walletAddress, username, character });
+    await user.save();
+    res.status(201).json(user);
   } catch (error) {
-    console.error(error);
+    console.error('Error registering user:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -45,22 +31,12 @@ router.post('/register', async (req, res) => {
 router.get('/:walletAddress', async (req, res) => {
   try {
     const user = await User.findOne({ walletAddress: req.params.walletAddress });
-    
-    if (user) {
-      // Update last login time
-      user.lastLogin = Date.now();
-      await user.save();
-      
-      res.json({
-        walletAddress: user.walletAddress,
-        username: user.username,
-        character: user.character
-      });
-    } else {
-      res.status(404).json({ message: 'User not found' });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
+    res.json(user);
   } catch (error) {
-    console.error(error);
+    console.error('Error fetching user:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
@@ -68,23 +44,27 @@ router.get('/:walletAddress', async (req, res) => {
 // Update user character
 router.put('/:walletAddress', async (req, res) => {
   try {
-    const { character } = req.body;
     const user = await User.findOne({ walletAddress: req.params.walletAddress });
-    
-    if (user) {
-      user.character = character;
-      await user.save();
-      
-      res.json({
-        walletAddress: user.walletAddress,
-        username: user.username,
-        character: user.character
-      });
-    } else {
-      res.status(404).json({ message: 'User not found' });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
+
+    user.character = req.body.character || user.character;
+    await user.save();
+    res.json(user);
   } catch (error) {
-    console.error(error);
+    console.error('Error updating user:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Fetch all users
+router.get('/', async (req, res) => {
+  try {
+    const users = await User.find({}, 'walletAddress username character');
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching all users:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

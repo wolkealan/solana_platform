@@ -5,8 +5,9 @@ import FriendsList from './FriendsList';
 import FriendSearch from './FriendSearch';
 import ChatWindow from './ChatWindow';
 import MessagesList from './MessagesList';
-import { getPendingRequests, getFriends } from '../services/connectionService';
-import { markMessagesAsRead, getConversation, getAllConversations } from '../services/messageService';
+import Leaderboard from './Leaderboard';
+import { getPendingRequests } from '../services/connectionService';
+import { getAllConversations, markMessagesAsRead } from '../services/messageService';
 import '../styles/SocialMenu.css';
 
 export const friendEvents = {
@@ -29,30 +30,28 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
   const [unreadMessages, setUnreadMessages] = useState({});
 
   useEffect(() => {
-    console.log('isPointerLocked:', isPointerLocked);
     const fetchPendingCount = async () => {
       try {
         const requests = await getPendingRequests(walletAddress);
         setPendingCount(requests.length);
       } catch (error) {
-        console.error('Failed to fetch pending requests:', error);
+        console.error('Failed to fetch pending requests:', error.message, error.response?.data);
       }
     };
 
     const fetchUnreadMessages = async () => {
       try {
         const conversations = await getAllConversations(walletAddress);
-        console.log('Fetched conversations:', conversations);
         const unreadCounts = {};
         for (const convo of conversations) {
-          const friendWallet = convo.senderWallet === walletAddress ? convo.receiverWallet : convo.senderWallet;
-          if (!unreadCounts[friendWallet] && !convo.read) {
+          const friendWallet = convo.friend?.walletAddress;
+          if (friendWallet && !convo.latestMessage?.read) {
             unreadCounts[friendWallet] = (unreadCounts[friendWallet] || 0) + 1;
           }
         }
         setUnreadMessages(unreadCounts);
       } catch (error) {
-        console.error('Failed to fetch unread messages:', error);
+        console.error('Failed to fetch unread messages:', error.message, error.response?.data);
       }
     };
 
@@ -70,7 +69,6 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
   };
 
   const openChat = (friend) => {
-    console.log('openChat called with friend:', friend);
     if (!friend || !friend.walletAddress) {
       console.error('Invalid friend object:', friend);
       return;
@@ -98,6 +96,12 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
   return (
     <div className={`social-menu-container ${isPointerLocked ? 'pointer-locked' : ''}`}>
       <div className="social-buttons">
+        <button 
+          className={`social-btn ${activePanel === 'leaderboard' ? 'active' : ''}`}
+          onClick={() => togglePanel('leaderboard')}
+        >
+          Leaderboard
+        </button>
         <button 
           className={`social-btn ${activePanel === 'messages' ? 'active' : ''}`}
           onClick={() => togglePanel('messages')}
@@ -130,6 +134,13 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
         </button>
       </div>
 
+      {activePanel === 'leaderboard' && (
+        <Leaderboard 
+          walletAddress={walletAddress} 
+          onClose={() => setActivePanel(null)} 
+          onFriendUpdate={onFriendUpdate}
+        />
+      )}
       {activePanel === 'messages' && (
         <MessagesList 
           walletAddress={walletAddress} 

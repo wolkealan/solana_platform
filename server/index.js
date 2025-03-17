@@ -1,10 +1,11 @@
+// server/index.js
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
 const connectionRoutes = require('./routes/connectionRoutes');
-const messageRoutes = require('./routes/messageRoutes'); // Add this
+const messageRoutes = require('./routes/messageRoutes');
 
 dotenv.config();
 
@@ -17,7 +18,7 @@ app.use(express.json());
 
 app.use('/api/users', userRoutes);
 app.use('/api/connections', connectionRoutes);
-app.use('/api/messages', messageRoutes); // Add this
+app.use('/api/messages', messageRoutes);
 
 const PORT = process.env.PORT || 5001;
 

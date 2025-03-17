@@ -1,47 +1,61 @@
+// server/routes/connectionRoutes.js
 const express = require('express');
-const router = express.Router();
-const Connection = require('../models/connectionModel');
 const User = require('../models/userModel');
+const Connection = require('../models/connectionModel');
+const router = express.Router();
 
-// Send friend request
+// Send a friend request
 router.post('/request', async (req, res) => {
+  const { senderWallet, receiverWallet } = req.body;
+
   try {
-    const { senderWallet, receiverWallet } = req.body;
-    
-    // Validate both wallets exist
-    const senderExists = await User.findOne({ walletAddress: senderWallet });
-    const receiverExists = await User.findOne({ walletAddress: receiverWallet });
-    
-    if (!senderExists || !receiverExists) {
-      return res.status(404).json({ message: 'One or both users not found' });
+    // Validate input
+    if (!senderWallet || !receiverWallet) {
+      return res.status(400).json({ message: 'senderWallet and receiverWallet are required' });
     }
-    
-    // Check if connection already exists
+
+    // Check if users exist
+    const sender = await User.findOne({ walletAddress: senderWallet });
+    const receiver = await User.findOne({ walletAddress: receiverWallet });
+    if (!sender || !receiver) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if already friends
     const existingConnection = await Connection.findOne({
       $or: [
-        { senderWallet, receiverWallet },
-        { senderWallet: receiverWallet, receiverWallet: senderWallet }
-      ]
+        { senderWallet: senderWallet, receiverWallet: receiverWallet },
+        { senderWallet: receiverWallet, receiverWallet: senderWallet },
+      ],
+      status: 'accepted',
     });
-    
     if (existingConnection) {
-      return res.status(400).json({ 
-        message: 'Connection already exists', 
-        status: existingConnection.status 
-      });
+      return res.status(400).json({ message: 'Already friends' });
     }
-    
-    // Create new connection
-    const connection = await Connection.create({
-      senderWallet,
-      receiverWallet,
-      status: 'pending'
+
+    // Check if request already exists
+    const existingRequest = await Connection.findOne({
+      $or: [
+        { senderWallet: senderWallet, receiverWallet: receiverWallet },
+        { senderWallet: receiverWallet, receiverWallet: senderWallet },
+      ],
+      status: 'pending',
     });
-    
-    res.status(201).json(connection);
+    if (existingRequest) {
+      return res.status(400).json({ message: 'Friend request already sent' });
+    }
+
+    // Create friend request
+    const connection = new Connection({
+      senderWallet: senderWallet,
+      receiverWallet: receiverWallet,
+      status: 'pending',
+    });
+    await connection.save();
+    res.status(201).json({ message: 'Friend request sent' });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    console.error('Error sending friend request:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 
