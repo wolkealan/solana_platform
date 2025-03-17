@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   ContactShadows,
   Grid,
-  Sky,
+  Environment,
 } from '@react-three/drei';
 import { Physics, RigidBody, CuboidCollider } from '@react-three/rapier';
 import { ConvaiFPS } from './fps/convaiFPS';
@@ -11,6 +11,7 @@ import { DualAnimatedCharacter } from './models/DualAnimatedCharacter';
 import { FriendCharacter } from './models/FriendCharacter';
 import { getFriends } from '../services/connectionService';
 import { friendEvents } from './SocialMenu';
+import { Color } from 'three';
 
 export const Experience = ({ client, characterType, walletAddress, onLockChange }) => {
   const [gravity, setGravity] = useState([0, 0, 0]);
@@ -86,14 +87,14 @@ export const Experience = ({ client, characterType, walletAddress, onLockChange 
     <>
       <ambientLight intensity={0.2} />
       <hemisphereLight
-        skyColor={'#fcf9d9'}
-        groundColor={'#fcf9d9'}
+        skyColor={new Color(0x1a1a2e)}
+        groundColor={new Color(0x0f0f1c)}
         intensity={0.5}
         castShadow
       />
       <directionalLight
         position={[500, 100, 500]}
-        color={'#fcf9d9'}
+        color={new Color(0xff00ff)}
         intensity={2}
         castShadow
       />
@@ -110,7 +111,15 @@ export const Experience = ({ client, characterType, walletAddress, onLockChange 
           />
         ))}
         
-        <Sky />
+        <Environment
+          background
+          files="/assets/golden_bay_2k.exr" // Ensure this path is correct
+          ground={{
+            height: 10,
+            radius: 50,
+            scale: 100,
+          }}
+        />
         <Grid followCamera infiniteGrid fadeDistance={50} />
         <RigidBody type="fixed">
           <CuboidCollider args={[5, 5, 0.1]} position={[0, 1.5, -3]} />
