@@ -3,16 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { getFriends } from '../services/connectionService';
 import '../styles/FriendsList.css';
 
-const FriendsList = ({ walletAddress, onClose }) => {
+const FriendsList = ({ walletAddress, onClose, onChatOpen, unreadMessages }) => {
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [lastRefresh, setLastRefresh] = useState(Date.now());
-
-  // Force refresh when a friend is added
-  const refreshFriends = () => {
-    setLastRefresh(Date.now());
-  };
 
   useEffect(() => {
     const fetchFriends = async () => {
@@ -28,12 +22,9 @@ const FriendsList = ({ walletAddress, onClose }) => {
     };
 
     fetchFriends();
-    
-    // Poll for updates every 30 seconds
     const interval = setInterval(fetchFriends, 30000);
-    
     return () => clearInterval(interval);
-  }, [walletAddress, lastRefresh]);
+  }, [walletAddress]);
 
   return (
     <div className="friends-list-container">
@@ -56,12 +47,21 @@ const FriendsList = ({ walletAddress, onClose }) => {
                 <span className="username">{friend.username}</span>
                 <span className="wallet">{friend.walletAddress.substring(0, 6)}...{friend.walletAddress.substring(friend.walletAddress.length - 4)}</span>
               </div>
-              <div className="friend-character">
+              <div className="friend-actions">
                 <img 
                   src={`/thumbnails/${friend.character}.png`} 
                   alt={friend.character} 
                   className="character-thumbnail"
                 />
+                <button 
+                  className="chat-btn"
+                  onClick={() => onChatOpen(friend)}
+                >
+                  Chat
+                  {unreadMessages[friend.walletAddress] > 0 && (
+                    <span className="unread-badge">{unreadMessages[friend.walletAddress]}</span>
+                  )}
+                </button>
               </div>
             </li>
           ))}

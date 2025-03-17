@@ -1,0 +1,104 @@
+/* src/styles/MessagesList.css */
+.social-menu-container .messages-list-container {
+    position: absolute;
+    top: 80px;
+    left: 20px;
+    right: auto;
+    width: 300px;
+    background-color: rgba(0, 0, 0, 0.8);
+    border-radius: 8px;
+    padding: 15px;
+    color: white;
+    z-index: 1002;
+    pointer-events: auto; /* Ensure the panel is interactive */
+  }
+  
+  /* Rest of the styles remain unchanged */
+  .messages-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  
+  .messages-list-header h2 {
+    margin: 0;
+    font-size: 18px;
+  }
+  
+  .close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  
+  .conversations-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .conversation-item {
+    padding: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  .conversation-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .conversation-info {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .username {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .wallet {
+    font-size: 12px;
+    color: #ccc;
+  }
+  
+  .latest-message {
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 5px;
+  }
+  
+  .conversation-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  
+  .timestamp {
+    font-size: 10px;
+    color: #aaa;
+  }
+  
+  .unread-badge {
+    background-color: #f44336;
+    color: white;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 5px;
+  }
+  
+  .error-message {
+    color: #f44336;
+    margin-top: 10px;
+  }
