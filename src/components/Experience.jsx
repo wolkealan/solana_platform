@@ -1,4 +1,3 @@
-// src/components/Experience.jsx
 import React, { useState, useEffect } from 'react';
 import {
   ContactShadows,
@@ -14,34 +13,35 @@ import { FriendCharacter } from './models/FriendCharacter';
 import { getFriends } from '../services/connectionService';
 import { friendEvents } from './SocialMenu';
 
-export const Experience = ({ client, characterType, walletAddress }) => {
+export const Experience = ({ client, characterType, walletAddress, onLockChange }) => {
   const [gravity, setGravity] = useState([0, 0, 0]);
   const [friends, setFriends] = useState([]);
-  
+  const [isLocked, setIsLocked] = useState(false);
+
   useEffect(() => {
     setGravity([0, -9.81, 0]);
   }, []);
-  
+
   // Inside Experience component
-useEffect(() => {
-  const loadFriends = async () => {
-    if (walletAddress) {
-      try {
-        const friendsData = await getFriends(walletAddress);
-        setFriends(friendsData);
-      } catch (error) {
-        console.error("Failed to load friends:", error);
+  useEffect(() => {
+    const loadFriends = async () => {
+      if (walletAddress) {
+        try {
+          const friendsData = await getFriends(walletAddress);
+          setFriends(friendsData);
+        } catch (error) {
+          console.error("Failed to load friends:", error);
+        }
       }
-    }
-  };
-  
-  loadFriends();
-  
-  // Subscribe to friend updates
-  const unsubscribe = friendEvents.subscribe(loadFriends);
-  
-  return () => unsubscribe();
-}, [walletAddress]);
+    };
+    
+    loadFriends();
+    
+    // Subscribe to friend updates
+    const unsubscribe = friendEvents.subscribe(loadFriends);
+    
+    return () => unsubscribe();
+  }, [walletAddress]);
 
   // Fetch friends when component mounts
   useEffect(() => {
@@ -58,6 +58,12 @@ useEffect(() => {
     
     loadFriends();
   }, [walletAddress]);
+
+  // Handle lock state changes
+  const handleLockChange = (locked) => {
+    setIsLocked(locked);
+    onLockChange?.(locked); // Notify parent component (App)
+  };
 
   // Render different character based on selection
   const renderCharacter = () => {
@@ -103,7 +109,7 @@ useEffect(() => {
       {/* models */}
       <Stats />
       <Physics gravity={gravity}>
-        <ConvaiFPS />
+        <ConvaiFPS onLockChange={handleLockChange} />
         {renderCharacter()}
         
         {/* Render friends */}

@@ -8,7 +8,7 @@ import { useConvaiClient } from './hooks/useConvaiClient';
 import './styles/WalletStyles.css';
 import { getUserByWallet, registerUser, updateUserCharacter } from './services/userService';
 import './styles/Registration.css';
-import SocialMenu from './components/SocialMenu'; // Import the SocialMenu component
+import SocialMenu from './components/SocialMenu';
 
 function App() {
   const [walletAddress, setWalletAddress] = useState('');
@@ -18,6 +18,7 @@ function App() {
   const [user, setUser] = useState(null);
   const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState('');
+  const [isPointerLocked, setIsPointerLocked] = useState(false);
   
   const { client } = useConvaiClient('characterId', 'apikey');
   
@@ -118,17 +119,15 @@ function App() {
   
   // Registration component
   const UserRegistration = React.memo(() => {
-    // Use a local state for username to prevent re-renders
     const [localUsername, setLocalUsername] = useState(username);
     
-    // Only update parent state when form is submitted
     const handleLocalChange = (e) => {
       setLocalUsername(e.target.value);
     };
     
     const handleSubmit = (e) => {
       e.preventDefault();
-      setUsername(localUsername); // Update parent state
+      setUsername(localUsername);
       handleRegistration(e);
     };
   
@@ -177,40 +176,44 @@ function App() {
       )}
       
       {/* Show 3D scene after character selection */}
-{walletConnected && !isRegistering && selectedCharacter && (
-  <>
-    <KeyboardControls
-      map={[
-        { name: 'forward', keys: ['ArrowUp', 'w', 'W'] },
-        { name: 'backward', keys: ['ArrowDown', 's', 'S'] },
-        { name: 'left', keys: ['ArrowLeft', 'a', 'A'] },
-        { name: 'right', keys: ['ArrowRight', 'd', 'D'] },
-        { name: 'sprint', keys: ['Shift'] },
-        { name: 'jump', keys: ['Space'] },
-      ]}
-    >
-      <Canvas
-        shadows
-        camera={{
-          position: [0, 0.8, 3],
-          fov: 75,
-        }}
-      >
-        <Experience 
-          client={client} 
-          characterType={selectedCharacter}
-          walletAddress={walletAddress}
-        />
-      </Canvas>
-      <Loader />
-    </KeyboardControls>
-    
-    {/* Move SocialMenu here - outside the Canvas */}
-    <SocialMenu walletAddress={walletAddress} />
-    
-    <ChatBubble client={client} />
-  </>
-)}
+      {walletConnected && !isRegistering && selectedCharacter && (
+        <>
+          <KeyboardControls
+            map={[
+              { name: 'forward', keys: ['ArrowUp', 'w', 'W'] },
+              { name: 'backward', keys: ['ArrowDown', 's', 'S'] },
+              { name: 'left', keys: ['ArrowLeft', 'a', 'A'] },
+              { name: 'right', keys: ['ArrowRight', 'd', 'D'] },
+              { name: 'sprint', keys: ['Shift'] },
+              { name: 'jump', keys: ['Space'] },
+            ]}
+          >
+            <Canvas
+              id="canvas"
+              shadows
+              camera={{
+                position: [0, 0.8, 3],
+                fov: 75,
+              }}
+            >
+              <Experience 
+                client={client} 
+                characterType={selectedCharacter}
+                walletAddress={walletAddress}
+                onLockChange={setIsPointerLocked}
+              />
+            </Canvas>
+            <Loader />
+          </KeyboardControls>
+          
+          <SocialMenu walletAddress={walletAddress} />
+          
+          <ChatBubble 
+            client={client} 
+            isPointerLocked={isPointerLocked}
+          />
+        </>
+      )}
     </>
   );
 }

@@ -6,7 +6,7 @@ import reset from "../../assets/reset.png";
 import "../../index.css";
 
 const ChatBubble = (props) => {
-  const { chatHistory, client  } = props;
+  const { chatHistory, client, isPointerLocked } = props;
   const [isHovered, setIsHovered] = useState(false);
   const [history, setHistory] = useState(1);
   const [session, setSession] = useState("-1");
@@ -14,17 +14,20 @@ const ChatBubble = (props) => {
   const [errorResponse, setErrorResponse] = useState(false);
   const timer = useRef(null);
   const errorMessage = " Error in retrieving response. Please reset session.";
-  //Toggle History panel
+
+  // Toggle History panel
   const showHistory = () => {
-    setHistory(!history);
+    if (!isPointerLocked) {
+      setHistory(!history);
+    }
   };
 
-  //Takes User text from the textBox
+  // Takes User text from the textBox
   const userInput = (text) => {
     client?.setUserText(text);
   };
 
-  //Reset Session
+  // Reset Session
   const ResetHistory = () => {
     const storedData = localStorage.getItem("messages");
     if (storedData) {
@@ -47,50 +50,46 @@ const ChatBubble = (props) => {
     client?.setNpcText("");
   };
 
-  //Retrieve Latest chat history of a particular character
+  // Handle reset click with pointer lock check
+  const handleResetClick = (e) => {
+    if (!isPointerLocked) {
+      ResetHistory();
+    }
+    e.preventDefault();
+  };
+
+  // Retrieve Latest chat history of a particular character
   useEffect(() => {
-    // Retrieve stored data from localStorage
     const storedData = localStorage.getItem("messages");
 
     if (client?.characterId) {
       if (storedData) {
-        // Parse the retrieved data from JSON format
         const parsedData = JSON.parse(storedData);
-
         const characterIDs = Object.keys(parsedData);
 
-        // Check if character ID matches the stored character ID
         if (characterIDs.includes(client?.characterId)) {
-          // Retrieve the sessionID for the current character ID
           const parsedSessionID = parsedData[client?.characterId].sessionID;
           if (parsedSessionID) {
-            // Update the sessionID state
             setSession(parsedSessionID);
           }
 
-          // Retrieve the messages for the current character ID
           const parsedMessage = parsedData[client?.characterId].message;
           if (parsedMessage) {
             const storedMessages = JSON.parse(parsedMessage);
-
-            // Update the messages state
             setMessages(storedMessages);
           }
         } else {
-          // No stored messages for the current character ID
           setMessages([]);
         }
       } else {
-        // No stored data
         setSession("-1");
         setMessages([]);
       }
     }
   }, [client?.characterId]);
 
-  //Store latest User and Npc Messages into the chat history
+  // Store latest User and Npc Messages into the chat history
   useEffect(() => {
-    //Used to set the session Id on the 1st interaction
     if (
       client?.convaiClient?.current &&
       session === "-1" &&
@@ -103,18 +102,13 @@ const ChatBubble = (props) => {
       const storedData = localStorage.getItem("messages");
 
       if (storedData) {
-        // Parse the retrieved data from JSON format
         const parsedData = JSON.parse(storedData);
-
-        // Update the messages for the current character ID in the stored data
         parsedData[client.characterId] = {
           sessionID: session,
           message: messagesJSON,
         };
-        // Update the stored data in localStorage
         localStorage.setItem("messages", JSON.stringify(parsedData));
       } else {
-        // No stored data, create a new entry for the current character ID
         const messagesData = {
           [client.characterId]: {
             sessionID: session,
@@ -180,12 +174,13 @@ const ChatBubble = (props) => {
             color: "white",
             display: "flex",
             justifyContent: "center",
-            cursor: "pointer",
+            cursor: isPointerLocked ? "default" : "pointer",
             marginBottom: "10px",
+            pointerEvents: isPointerLocked ? "none" : "auto",
           }}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          onClick={ResetHistory}
+          onMouseEnter={() => !isPointerLocked && setIsHovered(true)}
+          onMouseLeave={() => !isPointerLocked && setIsHovered(false)}
+          onClick={handleResetClick}
         >
           <div
             style={{
@@ -224,14 +219,14 @@ const ChatBubble = (props) => {
           showHistory={showHistory}
           npcName={client?.npcName ? client.npcName : "Npc"}
           userName={client?.userName ? client.userName : "User"}
-        ></ChatHistory>
+        />
       )}
       <ChatBubblev1
         npcText={client?.npcText}
         userText={client?.userText}
         messages={messages}
         keyPressed={client?.keyPressed}
-      ></ChatBubblev1>
+      />
     </section>
   );
 };
