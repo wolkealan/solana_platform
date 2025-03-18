@@ -1,4 +1,3 @@
-// src/components/Experience.jsx
 import React, { useState, useEffect } from 'react';
 import { ContactShadows, Grid, Environment } from '@react-three/drei';
 import { Physics, RigidBody, CuboidCollider } from '@react-three/rapier';
@@ -68,18 +67,32 @@ export const Experience = ({ client, characterType, walletAddress, onLockChange 
 
   return (
     <>
-      <ambientLight intensity={0.2} />
-      <hemisphereLight
-        skyColor={new Color(0x1a1a2e)}
-        groundColor={new Color(0x0f0f1c)}
+      {/* Use transformed.hdr HDRI for background and lighting */}
+      <Environment
+        background
+        files="/assets/transformed.hdr"
+        ground={{
+          height: 10,
+          radius: 50,
+          scale: 100,
+        }}
+      />
+
+      {/* Ambient and directional lighting as fallback or enhancement */}
+      <ambientLight intensity={0.3} />
+      <directionalLight
+        position={[500, 100, 500]}
+        color={new Color(0xffffff)}
         intensity={0.5}
         castShadow
       />
-      <directionalLight
-        position={[500, 100, 500]}
-        color={new Color(0xff00ff)}
-        intensity={2}
-        castShadow
+      {/* Neutral point light to enhance visibility */}
+      <pointLight
+        position={[0, 10, 0]}
+        color={new Color(0xffffff)} // White light to avoid color bias
+        intensity={0.5}
+        distance={30}
+        decay={2}
       />
 
       <Physics gravity={gravity}>
@@ -94,15 +107,6 @@ export const Experience = ({ client, characterType, walletAddress, onLockChange 
           />
         ))}
         
-        <Environment
-          background
-          files="/assets/golden_bay_2k.exr"
-          ground={{
-            height: 10,
-            radius: 50,
-            scale: 100,
-          }}
-        />
         <Grid followCamera infiniteGrid fadeDistance={50} />
         <RigidBody type="fixed">
           <CuboidCollider args={[5, 5, 0.1]} position={[0, 1.5, -3]} />
