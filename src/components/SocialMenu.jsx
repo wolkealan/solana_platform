@@ -28,6 +28,7 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
   const [pendingCount, setPendingCount] = useState(0);
   const [activeChats, setActiveChats] = useState([]);
   const [unreadMessages, setUnreadMessages] = useState({});
+  const [totalUnread, setTotalUnread] = useState(0);
 
   useEffect(() => {
     const fetchPendingCount = async () => {
@@ -43,13 +44,18 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
       try {
         const conversations = await getAllConversations(walletAddress);
         const unreadCounts = {};
+        let total = 0;
+        
         for (const convo of conversations) {
           const friendWallet = convo.friend?.walletAddress;
-          if (friendWallet && !convo.latestMessage?.read) {
-            unreadCounts[friendWallet] = (unreadCounts[friendWallet] || 0) + 1;
+          if (friendWallet && convo.unreadCount) {
+            unreadCounts[friendWallet] = convo.unreadCount;
+            total += convo.unreadCount;
           }
         }
+        
         setUnreadMessages(unreadCounts);
+        setTotalUnread(total);
       } catch (error) {
         console.error('Failed to fetch unread messages:', error.message, error.response?.data);
       }
@@ -57,10 +63,12 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
 
     fetchPendingCount();
     fetchUnreadMessages();
+    
     const interval = setInterval(() => {
       fetchPendingCount();
       fetchUnreadMessages();
     }, 10000);
+    
     return () => clearInterval(interval);
   }, [walletAddress]);
 
@@ -73,12 +81,14 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
       console.error('Invalid friend object:', friend);
       return;
     }
+    
     if (!activeChats.find(chat => chat.walletAddress === friend.walletAddress)) {
       setActiveChats([...activeChats, friend]);
       markMessagesAsRead(walletAddress, friend.walletAddress).then(() => {
         setUnreadMessages(prev => {
           const newUnread = { ...prev };
           delete newUnread[friend.walletAddress];
+          setTotalUnread(prev => prev - (prev[friend.walletAddress] || 0));
           return newUnread;
         });
       });
@@ -92,6 +102,15 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
   const onFriendUpdate = useCallback(() => {
     friendEvents.emit();
   }, []);
+
+  // Position chat windows with appropriate spacing
+  const getChatPosition = (index) => {
+    const baseRight = 20;
+    const spacing = 340; // Width of chat window + margin
+    return {
+      right: baseRight + (index * spacing)
+    };
+  };
 
   return (
     <div className={`social-menu-container ${isPointerLocked ? 'pointer-locked' : ''}`}>
@@ -107,9 +126,9 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
           onClick={() => togglePanel('messages')}
         >
           Messages
-          {Object.keys(unreadMessages).length > 0 && (
+          {totalUnread > 0 && (
             <span className="notification-badge">
-              {Object.values(unreadMessages).reduce((a, b) => a + b, 0)}
+              {totalUnread}
             </span>
           )}
         </button>
@@ -141,6 +160,7 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
           onFriendUpdate={onFriendUpdate}
         />
       )}
+      
       {activePanel === 'messages' && (
         <MessagesList 
           walletAddress={walletAddress} 
@@ -148,6 +168,7 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
           onChatOpen={openChat}
         />
       )}
+      
       {activePanel === 'friends' && (
         <FriendsList 
           walletAddress={walletAddress} 
@@ -156,6 +177,7 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
           unreadMessages={unreadMessages}
         />
       )}
+      
       {activePanel === 'requests' && (
         <FriendRequests 
           walletAddress={walletAddress} 
@@ -163,6 +185,7 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
           onFriendUpdate={onFriendUpdate}
         />
       )}
+      
       {activePanel === 'search' && (
         <FriendSearch 
           walletAddress={walletAddress} 
@@ -170,12 +193,13 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
         />
       )}
 
-      {activeChats.map(friend => (
+      {activeChats.map((friend, index) => (
         <ChatWindow
           key={friend.walletAddress}
           walletAddress={walletAddress}
           friend={friend}
           onClose={() => closeChat(friend.walletAddress)}
+          style={getChatPosition(index)}
         />
       ))}
     </div>

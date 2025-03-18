@@ -26,6 +26,12 @@ const FriendsList = ({ walletAddress, onClose, onChatOpen, unreadMessages }) => 
     return () => clearInterval(interval);
   }, [walletAddress]);
 
+  // Format wallet address for display
+  const formatWallet = (wallet) => {
+    if (!wallet) return '';
+    return `${wallet.substring(0, 6)}...${wallet.substring(wallet.length - 4)}`;
+  };
+
   return (
     <div className="friends-list-container">
       <div className="friends-list-header">
@@ -34,25 +40,26 @@ const FriendsList = ({ walletAddress, onClose, onChatOpen, unreadMessages }) => 
       </div>
       
       {loading ? (
-        <p>Loading friends...</p>
+        <div className="loading-container">
+          <div className="loading-indicator"></div>
+          <p>Loading friends...</p>
+        </div>
       ) : error ? (
         <p className="error-message">{error}</p>
       ) : friends.length === 0 ? (
-        <p>No friends yet</p>
+        <div className="empty-state">
+          <p>You don't have any friends yet</p>
+          <p className="empty-state-hint">Use the "Add Friend" button to connect with others</p>
+        </div>
       ) : (
         <ul className="friends-list">
           {friends.map((friend) => (
             <li key={friend.walletAddress} className="friend-item">
               <div className="friend-info">
                 <span className="username">{friend.username}</span>
-                <span className="wallet">{friend.walletAddress.substring(0, 6)}...{friend.walletAddress.substring(friend.walletAddress.length - 4)}</span>
+                <span className="wallet">{formatWallet(friend.walletAddress)}</span>
               </div>
               <div className="friend-actions">
-                <img 
-                  src={`/thumbnails/${friend.character}.png`} 
-                  alt={friend.character} 
-                  className="character-thumbnail"
-                />
                 <button 
                   className="chat-btn"
                   onClick={() => onChatOpen(friend)}
