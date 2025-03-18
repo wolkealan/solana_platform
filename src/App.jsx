@@ -1,3 +1,4 @@
+// Modified App.jsx with loading transition
 import React, { useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { KeyboardControls, Loader } from '@react-three/drei';
@@ -8,6 +9,8 @@ import './styles/WalletStyles.css';
 import { getUserByWallet, registerUser, updateUserCharacter } from './services/userService';
 import './styles/Registration.css';
 import SocialMenu from './components/SocialMenu';
+import LeaderboardPage from './components/LeaderboardPage';
+import './styles/LoadingTransition.css';
 
 function App() {
   const [walletAddress, setWalletAddress] = useState('');
@@ -18,6 +21,8 @@ function App() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState('');
   const [isPointerLocked, setIsPointerLocked] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   
   const { client } = useConvaiClient('characterId', 'apikey');
   
@@ -84,6 +89,46 @@ function App() {
       };
       
       updateCharacter();
+    }
+  };
+  
+  const handlePointerLockChange = (isLocked) => {
+    if (!showLeaderboard) {
+      setIsPointerLocked(isLocked);
+    }
+  };
+
+  const handleToggleLeaderboard = (show) => {
+    if (show) {
+      // Show leaderboard immediately
+      setShowLeaderboard(true);
+      
+      // Release pointer lock when showing leaderboard
+      if (isPointerLocked) {
+        // Find pointer lock controls and unlock
+        const pointerLockElement = document.pointerLockElement || 
+                                  document.mozPointerLockElement || 
+                                  document.webkitPointerLockElement;
+        if (pointerLockElement) {
+          document.exitPointerLock = document.exitPointerLock || 
+                                   document.mozExitPointerLock || 
+                                   document.webkitExitPointerLock;
+          document.exitPointerLock();
+        }
+      }
+    } else {
+      // Start transition when returning to 3D world
+      setIsTransitioning(true);
+      
+      // After showing loading transition, hide leaderboard
+      setTimeout(() => {
+        setShowLeaderboard(false);
+        
+        // Wait for canvas to load, then hide transition
+        setTimeout(() => {
+          setIsTransitioning(false);
+        }, 1500); // Adjust this timing based on how long your 3D scene takes to render
+      }, 500); // Short delay to show the transition screen
     }
   };
   
@@ -165,38 +210,60 @@ function App() {
       
       {walletConnected && !isRegistering && selectedCharacter && (
         <>
-          <KeyboardControls
-            map={[
-              { name: 'forward', keys: ['ArrowUp', 'w', 'W'] },
-              { name: 'backward', keys: ['ArrowDown', 's', 'S'] },
-              { name: 'left', keys: ['ArrowLeft', 'a', 'A'] },
-              { name: 'right', keys: ['ArrowRight', 'd', 'D'] },
-              { name: 'sprint', keys: ['Shift'] },
-              { name: 'jump', keys: ['Space'] },
-            ]}
-          >
-            <Canvas
-              id="canvas"
-              shadows
-              camera={{
-                position: [0, 0.8, 3],
-                fov: 75,
-              }}
-            >
-              <Experience 
-                client={client} 
-                characterType={selectedCharacter}
-                walletAddress={walletAddress}
-                onLockChange={setIsPointerLocked}
+          {/* Loading Transition Overlay */}
+          {isTransitioning && (
+            <div className="loading-transition-overlay">
+              <div className="loading-content">
+                <div className="cyberpunk-loader"></div>
+                <p>Loading Virtual World</p>
+              </div>
+            </div>
+          )}
+        
+          {/* Show Leaderboard or 3D World */}
+          {showLeaderboard ? (
+            <LeaderboardPage 
+              walletAddress={walletAddress} 
+              onReturn={() => handleToggleLeaderboard(false)}
+              onFriendUpdate={() => {}}
+            />
+          ) : (
+            <>
+              <KeyboardControls
+                map={[
+                  { name: 'forward', keys: ['ArrowUp', 'w', 'W'] },
+                  { name: 'backward', keys: ['ArrowDown', 's', 'S'] },
+                  { name: 'left', keys: ['ArrowLeft', 'a', 'A'] },
+                  { name: 'right', keys: ['ArrowRight', 'd', 'D'] },
+                  { name: 'sprint', keys: ['Shift'] },
+                  { name: 'jump', keys: ['Space'] },
+                ]}
+              >
+                <Canvas
+                  id="canvas"
+                  shadows
+                  camera={{
+                    position: [0, 0.8, 3],
+                    fov: 75,
+                  }}
+                >
+                  <Experience 
+                    client={client} 
+                    characterType={selectedCharacter}
+                    walletAddress={walletAddress}
+                    onLockChange={handlePointerLockChange}
+                  />
+                </Canvas>
+                <Loader />
+              </KeyboardControls>
+              
+              <SocialMenu 
+                walletAddress={walletAddress} 
+                isPointerLocked={isPointerLocked}
+                onToggleLeaderboard={handleToggleLeaderboard}
               />
-            </Canvas>
-            <Loader />
-          </KeyboardControls>
-          
-          <SocialMenu 
-            walletAddress={walletAddress} 
-            isPointerLocked={isPointerLocked}
-          />
+            </>
+          )}
         </>
       )}
     </>

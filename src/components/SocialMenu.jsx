@@ -1,11 +1,10 @@
-// src/components/SocialMenu.jsx
+// Modified SocialMenu.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import FriendRequests from './FriendRequests';
 import FriendsList from './FriendsList';
 import FriendSearch from './FriendSearch';
 import ChatWindow from './ChatWindow';
 import MessagesList from './MessagesList';
-import Leaderboard from './Leaderboard';
 import { getPendingRequests } from '../services/connectionService';
 import { getAllConversations, markMessagesAsRead } from '../services/messageService';
 import '../styles/SocialMenu.css';
@@ -23,7 +22,7 @@ export const friendEvents = {
   }
 };
 
-const SocialMenu = ({ walletAddress, isPointerLocked }) => {
+const SocialMenu = ({ walletAddress, isPointerLocked, onToggleLeaderboard }) => {
   const [activePanel, setActivePanel] = useState(null);
   const [pendingCount, setPendingCount] = useState(0);
   const [activeChats, setActiveChats] = useState([]);
@@ -73,7 +72,12 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
   }, [walletAddress]);
 
   const togglePanel = (panel) => {
-    setActivePanel(activePanel === panel ? null : panel);
+    if (panel === 'leaderboard') {
+      // Instead of showing a panel, we trigger the App component to show the leaderboard view
+      onToggleLeaderboard(true);
+    } else {
+      setActivePanel(activePanel === panel ? null : panel);
+    }
   };
 
   const openChat = (friend) => {
@@ -88,7 +92,7 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
         setUnreadMessages(prev => {
           const newUnread = { ...prev };
           delete newUnread[friend.walletAddress];
-          setTotalUnread(prev => prev - (prev[friend.walletAddress] || 0));
+          setTotalUnread(prevTotal => prevTotal - (prev[friend.walletAddress] || 0));
           return newUnread;
         });
       });
@@ -116,7 +120,7 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
     <div className={`social-menu-container ${isPointerLocked ? 'pointer-locked' : ''}`}>
       <div className="social-buttons">
         <button 
-          className={`social-btn ${activePanel === 'leaderboard' ? 'active' : ''}`}
+          className="social-btn"
           onClick={() => togglePanel('leaderboard')}
         >
           Leaderboard
@@ -153,14 +157,6 @@ const SocialMenu = ({ walletAddress, isPointerLocked }) => {
         </button>
       </div>
 
-      {activePanel === 'leaderboard' && (
-        <Leaderboard 
-          walletAddress={walletAddress} 
-          onClose={() => setActivePanel(null)} 
-          onFriendUpdate={onFriendUpdate}
-        />
-      )}
-      
       {activePanel === 'messages' && (
         <MessagesList 
           walletAddress={walletAddress} 
