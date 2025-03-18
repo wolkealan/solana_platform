@@ -5,7 +5,7 @@
   "dependencies": {
     "@improbable-eng/grpc-web": "^0.15.0",
     "@react-three/drei": "^9.88.2",
-    "@react-three/fiber": "^8.18.0",
+    "@react-three/fiber": "^8.13.0",
     "@react-three/postprocessing": "^2.14.11",
     "@react-three/rapier": "^1.2.1",
     "@solana/wallet-adapter-phantom": "^0.9.24",
@@ -31,7 +31,8 @@
     "three-stdlib": "^2.35.14",
     "web-vitals": "^2.1.4",
     "yuka": "^0.7.8",
-    "zustand": "^4.5.0"
+    "zustand": "^4.5.0",
+    "socket.io-client": "^4.8.0"
   },
   "proxy": "http://localhost:5001",
   "scripts": {

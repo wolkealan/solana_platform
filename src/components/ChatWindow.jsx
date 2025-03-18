@@ -1,6 +1,5 @@
-// src/components/ChatWindow.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { getConversation, sendMessage } from '../services/messageService';
+import { getConversation, sendMessage, initializeSocket, addSocketEventListener } from '../services/messageService';
 import '../styles/ChatWindow.css';
 
 const ChatWindow = ({ walletAddress, friend, onClose, style }) => {
@@ -13,47 +12,49 @@ const ChatWindow = ({ walletAddress, friend, onClose, style }) => {
   useEffect(() => {
     let isMounted = true;
 
-    const fetchMessages = async (initial = false) => {
-      if (!friend || !friend.walletAddress) {
-        console.error('Invalid friend object in ChatWindow:', friend);
-        if (isMounted && initial) setLoading(false);
-        return;
-      }
-
-      if (initial) setLoading(true);
-
+    const fetchInitialMessages = async () => {
+      setLoading(true);
       try {
         const conversation = await getConversation(walletAddress, friend.walletAddress);
         if (isMounted) {
-          // Process messages to ensure they have the right styling
-          const processedMessages = conversation ? conversation.map(msg => ({
-            ...msg
-          })) : [];
-          
-          setMessages(processedMessages);
-          if (initial) setLoading(false);
+          setMessages(conversation || []);
+          setLoading(false);
           setError('');
-          
-          // Scroll to bottom on new messages
-          setTimeout(() => {
-            scrollToBottom();
-          }, 100);
+          scrollToBottom();
         }
       } catch (err) {
-        console.error('Error in fetchMessages:', err.message, err.response?.data);
         if (isMounted) {
           setError('Failed to load messages');
-          if (initial) setLoading(false);
+          setLoading(false);
         }
       }
     };
 
-    fetchMessages(true);
-    const interval = setInterval(() => fetchMessages(false), 5000);
+    const handleNewMessage = (message) => {
+      console.log('ChatWindow received new message:', message);
+      if (
+        (message.senderWallet === walletAddress && message.receiverWallet === friend.walletAddress) ||
+        (message.senderWallet === friend.walletAddress && message.receiverWallet === walletAddress)
+      ) {
+        setMessages((prev) => [...prev, message]);
+        scrollToBottom();
+      }
+    };
+
+    const handleMessagesRead = () => {
+      console.log('ChatWindow received messagesRead');
+      setMessages((prev) => prev.map((msg) => ({ ...msg, read: true })));
+    };
+
+    fetchInitialMessages();
+    const socket = initializeSocket(walletAddress);
+    const removeNewMessageListener = addSocketEventListener('newMessage', handleNewMessage);
+    const removeMessagesReadListener = addSocketEventListener('messagesRead', handleMessagesRead);
 
     return () => {
       isMounted = false;
-      clearInterval(interval);
+      removeNewMessageListener();
+      removeMessagesReadListener();
     };
   }, [walletAddress, friend.walletAddress]);
 
@@ -68,19 +69,6 @@ const ChatWindow = ({ walletAddress, friend, onClose, style }) => {
     try {
       await sendMessage(walletAddress, friend.walletAddress, newMessage);
       setNewMessage('');
-      const updatedMessages = await getConversation(walletAddress, friend.walletAddress);
-      
-      // Ensure style consistency
-      const processedMessages = updatedMessages ? updatedMessages.map(msg => ({
-        ...msg
-      })) : [];
-      
-      setMessages(processedMessages);
-      
-      // Scroll to bottom after sending
-      setTimeout(() => {
-        scrollToBottom();
-      }, 100);
     } catch (err) {
       setError('Failed to send message');
     }
@@ -89,7 +77,7 @@ const ChatWindow = ({ walletAddress, friend, onClose, style }) => {
   const formatTime = (timestamp) => {
     return new Date(timestamp).toLocaleTimeString([], {
       hour: 'numeric',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
@@ -99,7 +87,7 @@ const ChatWindow = ({ walletAddress, friend, onClose, style }) => {
         <h3>{friend.username || 'Unknown'}</h3>
         <button className="close-btn" onClick={onClose}>×</button>
       </div>
-      
+
       <div className="chat-messages">
         {loading ? (
           <div className="loading-container">
@@ -118,16 +106,14 @@ const ChatWindow = ({ walletAddress, friend, onClose, style }) => {
                 className={`message ${msg.senderWallet === walletAddress ? 'sent' : 'received'}`}
               >
                 <p>{msg.content}</p>
-                <span className="message-time">
-                  {formatTime(msg.createdAt)}
-                </span>
+                <span className="message-time">{formatTime(msg.createdAt)}</span>
               </div>
             ))}
             <div ref={messagesEndRef} />
           </>
         )}
       </div>
-      
+
       <form className="chat-input-form" onSubmit={handleSendMessage}>
         <input
           className="chat-input"
@@ -135,8 +121,8 @@ const ChatWindow = ({ walletAddress, friend, onClose, style }) => {
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type a message..."
         />
-        <button 
-          className="cyber-button send-btn" 
+        <button
+          className="cyber-button send-btn"
           type="submit"
           disabled={!newMessage.trim()}
         >
