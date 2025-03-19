@@ -5,6 +5,10 @@
 
 body {
   margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: black;
+  color: white;
+  overflow-x: hidden;
 }
 
 .container {
@@ -33,11 +37,6 @@ body {
   width: 30vw;
   height: 45vh;
 }
-/* ::placeholder {
-  color: white;
-  text-align: center;
-  opacity: 1;
-} */
 
 .placeholder1::placeholder {
   color: white;
@@ -140,3 +139,64 @@ span {
   z-index: 1;
 }
 
+/* Tailwind-related variables and styles */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Make sure the spline viewer fills its container */
+spline-viewer {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+:root {
+  --background: 0 0% 0%;
+  --foreground: 0 0% 100%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 266 63% 59%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 266 63% 59%;
+  --radius: 0.5rem;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+.bg-gradient-text {
+  background: linear-gradient(to right, #FF4FBF, #9D4EDD, #5B5FFF);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.bg-gradient-button {
+  background: linear-gradient(to right, #FF4FBF, #9D4EDD, #5B5FFF);
+}

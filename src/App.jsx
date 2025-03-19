@@ -1,4 +1,4 @@
-// Modified App.jsx with loading transition
+// Modified App.jsx with landing page integration
 import React, { useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { KeyboardControls, Loader } from '@react-three/drei';
@@ -11,6 +11,7 @@ import './styles/Registration.css';
 import SocialMenu from './components/SocialMenu';
 import LeaderboardPage from './components/LeaderboardPage';
 import './styles/LoadingTransition.css';
+import LandingPage from './components/LandingPage'; // Import the landing page component
 
 function App() {
   const [walletAddress, setWalletAddress] = useState('');
@@ -23,6 +24,7 @@ function App() {
   const [isPointerLocked, setIsPointerLocked] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showLandingPage, setShowLandingPage] = useState(true); // State to control landing page visibility
   
   const { client } = useConvaiClient('characterId', 'apikey');
   
@@ -131,6 +133,11 @@ function App() {
       }, 500); // Short delay to show the transition screen
     }
   };
+
+  // Handler for Join Waitlist button on landing page
+  const handleJoinWaitlist = () => {
+    setShowLandingPage(false);
+  };
   
   const ManualWalletEntry = () => (
     <div className="wallet-connection-container">
@@ -197,6 +204,11 @@ function App() {
       </div>
     );
   });
+  
+  // Render based on application state
+  if (showLandingPage) {
+    return <LandingPage onJoinWaitlist={handleJoinWaitlist} />;
+  }
   
   return (
     <>
