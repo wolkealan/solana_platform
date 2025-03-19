@@ -3,6 +3,7 @@ import { useAnimations, useGLTF } from '@react-three/drei';
 import React, { useEffect, useRef, useMemo, useState } from 'react';
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils';
 import { useFrame } from '@react-three/fiber';
+// Remove this import if it's client-dependent
 import { useHeadTracking } from '../../hooks/useHeadTracking';
 
 export function DualAnimatedCharacter(props) {
@@ -31,7 +32,9 @@ export function DualAnimatedCharacter(props) {
   const { actions: specialActions, mixer: specialMixer } = useAnimations(clonedSpecialAnimations, groupRef);
   const [currentAnimation, setCurrentAnimation] = useState('idle');
   const [isSpecialKeyPressed, setIsSpecialKeyPressed] = useState(false);
-  const { client } = props;
+  
+  // Remove client references
+  // const { client } = props;
 
   // Handle key press for special animation
   useEffect(() => {
@@ -53,14 +56,15 @@ export function DualAnimatedCharacter(props) {
     };
   }, []);
 
-  // Set animation based on state
+  // Set animation based on state - remove client dependency
   useEffect(() => {
     if (isSpecialKeyPressed) {
       setCurrentAnimation('special');
     } else {
-      setCurrentAnimation(client?.isTalking ? 'talking' : 'idle');
+      // Replace client?.isTalking with just 'idle'
+      setCurrentAnimation('idle');
     }
-  }, [isSpecialKeyPressed, client?.isTalking]);
+  }, [isSpecialKeyPressed]);
 
   // Play the appropriate animation
   useEffect(() => {
@@ -95,8 +99,8 @@ export function DualAnimatedCharacter(props) {
     specialMixer?.update(delta);
   });
 
-  // Apply head tracking
-  useHeadTracking({ client, nodes: originalNodes, RPM: true });
+  // Remove head tracking if it depends on client
+  useHeadTracking({ nodes: originalNodes, RPM: true });
 
   return (
     <group {...props} dispose={null} ref={groupRef}>

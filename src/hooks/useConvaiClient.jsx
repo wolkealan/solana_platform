@@ -36,7 +36,7 @@ export function useConvaiClient(characterId, apiKey) {
     convaiClient.current = new ConvaiClient({
       apiKey: apiKey,
       characterId: characterId,
-      enableAudio: true, // use false for text only.
+      enableAudio: false, // use false for text only.
       faceModel: 3,
       enableFacialData: true,
       // enableEmotionalData : true,

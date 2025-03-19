@@ -1,10 +1,10 @@
-// Modified App.jsx with landing page integration
+// Modified App.jsx with landing page integration and no automatic mic access
 import React, { useState, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { KeyboardControls, Loader } from '@react-three/drei';
 import { Experience } from './components/Experience';
 import { CharacterSelection } from './components/CharacterSelection';
-import { useConvaiClient } from './hooks/useConvaiClient';
+// import { useConvaiClient } from './hooks/useConvaiClient';
 import './styles/WalletStyles.css';
 import { getUserByWallet, registerUser, updateUserCharacter } from './services/userService';
 import './styles/Registration.css';
@@ -26,7 +26,7 @@ function App() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showLandingPage, setShowLandingPage] = useState(true); // State to control landing page visibility
   
-  const { client } = useConvaiClient('characterId', 'apikey');
+  // const { client } = useConvaiClient('characterId', 'apikey'); // The hook now initializes with audio disabled
   
   useEffect(() => {
     if (walletConnected && walletAddress) {
@@ -260,7 +260,7 @@ function App() {
                   }}
                 >
                   <Experience 
-                    client={client} 
+                    // client={client} 
                     characterType={selectedCharacter}
                     walletAddress={walletAddress}
                     onLockChange={handlePointerLockChange}

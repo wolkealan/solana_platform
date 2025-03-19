@@ -2,7 +2,8 @@
 import { useAnimations, useGLTF } from '@react-three/drei';
 import React, { useEffect, useRef, useMemo, useState } from 'react';
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils';
-import { useRPMLipsync } from '../../hooks/useRPMLipsync';
+// Remove these imports if they're client-dependent
+// import { useRPMLipsync } from '../../hooks/useRPMLipsync';
 import { useHeadTracking } from '../../hooks/useHeadTracking';
 
 export function Anita(props) {
@@ -28,16 +29,15 @@ export function Anita(props) {
   const [animation, setAnimation] = useState(
     clonedAnimations.find((a) => a.name === 'Idle') ? 'Idle' : clonedAnimations[0]?.name
   );
-  const { client } = props;
+  
+  // Remove client reference
+  // const { client } = props;
 
-  // Update animation based on talking state
+  // Update animation - remove dependency on client.isTalking
   useEffect(() => {
-    if (client?.isTalking) {
-      setAnimation('Talking_0');
-    } else {
-      setAnimation('Idle');
-    }
-  }, [client?.isTalking]);
+    // Just use Idle animation by default
+    setAnimation('Idle');
+  }, []);
 
   // Play the selected animation
   useEffect(() => {
@@ -52,9 +52,9 @@ export function Anita(props) {
     }
   }, [animation, actions, mixer]);
 
-  // Apply lipsync and head tracking
-  useRPMLipsync({ client, nodes: originalNodes, scene: clonedScene });
-  useHeadTracking({ client, nodes: originalNodes, RPM: true });
+  // Remove lipsync and head tracking if they depend on client
+  // useRPMLipsync({ client, nodes: originalNodes, scene: clonedScene });
+  useHeadTracking({ nodes: originalNodes, RPM: true });
 
   return (
     <group {...props} dispose={null} ref={groupRef}>

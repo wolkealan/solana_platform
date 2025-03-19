@@ -1,3 +1,4 @@
+// src/components/Experience.jsx
 import React, { useState, useEffect } from 'react';
 import { ContactShadows, Grid, Environment } from '@react-three/drei';
 import { Physics, RigidBody, CuboidCollider } from '@react-three/rapier';
@@ -9,7 +10,8 @@ import { getFriends } from '../services/connectionService';
 import { friendEvents } from './SocialMenu';
 import { Color } from 'three';
 
-export const Experience = ({ client, characterType, walletAddress, onLockChange }) => {
+// Remove client from the props
+export const Experience = ({ characterType, walletAddress, onLockChange }) => {
   const [gravity, setGravity] = useState([0, 0, 0]);
   const [friends, setFriends] = useState([]);
   const [isLocked, setIsLocked] = useState(false);
@@ -45,12 +47,13 @@ export const Experience = ({ client, characterType, walletAddress, onLockChange 
     console.log('Rendering character:', characterType);
     switch (characterType) {
       case 'rpm':
-        return <DualAnimatedCharacter client={client} position={[0, 0, 0]} />;
+        // Remove client prop from components
+        return <DualAnimatedCharacter position={[0, 0, 0]} />;
       case 'anita':
-        return <Anita client={client} position={[0, 0, 0]} />;
+        return <Anita position={[0, 0, 0]} />;
       default:
         console.warn('Unknown character type:', characterType);
-        return <DualAnimatedCharacter client={client} position={[0, 0, 0]} />;
+        return <DualAnimatedCharacter position={[0, 0, 0]} />;
     }
   };
 
@@ -67,7 +70,6 @@ export const Experience = ({ client, characterType, walletAddress, onLockChange 
 
   return (
     <>
-      {/* Use transformed.hdr HDRI for background and lighting */}
       <Environment
         background
         files="/assets/transformed.hdr"
@@ -78,7 +80,6 @@ export const Experience = ({ client, characterType, walletAddress, onLockChange 
         }}
       />
 
-      {/* Ambient and directional lighting as fallback or enhancement */}
       <ambientLight intensity={0.3} />
       <directionalLight
         position={[500, 100, 500]}
@@ -86,10 +87,9 @@ export const Experience = ({ client, characterType, walletAddress, onLockChange 
         intensity={0.5}
         castShadow
       />
-      {/* Neutral point light to enhance visibility */}
       <pointLight
         position={[0, 10, 0]}
-        color={new Color(0xffffff)} // White light to avoid color bias
+        color={new Color(0xffffff)}
         intensity={0.5}
         distance={30}
         decay={2}
