@@ -16,7 +16,9 @@ const userSchema = mongoose.Schema({
   character: {
     type: String,
     required: true,
-    enum: ['rpm', 'anita'], // Expand this as you add more characters
+    enum: ['rpm', 'anita','rpmgirl','rpmgirl2','rpmsigma','rpmgirl3','rpmgirl4',
+      'rpmorangie','rpmcharacter2','rpmgirl5','rpmtrump','rpmnig'
+    ], // Expand this as you add more characters
   },
   createdAt: {
     type: Date,

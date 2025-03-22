@@ -167,7 +167,12 @@ const Leaderboard = ({ walletAddress, onClose, onFriendUpdate }) => {
     try {
       await sendFriendRequest(walletAddress, receiverWallet);
       alert('Friend request sent!');
-      onFriendUpdate(); // Notify parent component of friend update
+      
+      // Trigger friend update event
+      if (onFriendUpdate && typeof onFriendUpdate === 'function') {
+        console.log('Triggering friend update from Leaderboard');
+        onFriendUpdate();
+      }
     } catch (error) {
       console.error('Error sending friend request:', error.message, error.response?.data);
       alert('Failed to send friend request: ' + (error.response?.data?.message || error.message));
@@ -224,8 +229,9 @@ const Leaderboard = ({ walletAddress, onClose, onFriendUpdate }) => {
                     <button
                       className="friend-request-btn"
                       onClick={() => handleSendFriendRequest(entry.walletAddress)}
+                      disabled={entry.walletAddress === walletAddress}
                     >
-                      Send Friend Request
+                      {entry.walletAddress === walletAddress ? 'You' : 'Send Friend Request'}
                     </button>
                   </div>
                 </li>

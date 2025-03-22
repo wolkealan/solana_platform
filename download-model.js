@@ -3,10 +3,10 @@ const fs = require('fs');
 const path = require('path');
 
 // URL of the Ready Player Me model
-const modelUrl = 'https://models.readyplayer.me/67de61b055c6887bf45aca14.glb?morphTargets=ARKit,Oculus%20Visemes';
+const modelUrl = 'https://models.readyplayer.me/67deded3a15f571eaeff0fdc.glb?morphTargets=ARKit,Oculus%20Visemes';
 
 // Path where the model should be saved
-const outputPath = path.join(__dirname, 'public', 'models', 'rpmmale1.glb');
+const outputPath = path.join(__dirname, 'public', 'models', 'rpmtrump.glb');
 
 // Ensure the directory exists
 const dir = path.dirname(outputPath);

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getPendingRequests, respondToFriendRequest } from '../services/connectionService';
 import '../styles/FriendRequests.css';
 
-const FriendRequests = ({ walletAddress, onClose }) => {
+const FriendRequests = ({ walletAddress, onClose, onFriendUpdate }) => {
   const [pendingRequests, setPendingRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -27,6 +27,12 @@ const FriendRequests = ({ walletAddress, onClose }) => {
       await respondToFriendRequest(connectionId, 'accepted');
       // Remove the request from the list
       setPendingRequests(pendingRequests.filter(req => req._id !== connectionId));
+      
+      // Trigger friend update event
+      if (onFriendUpdate && typeof onFriendUpdate === 'function') {
+        console.log('Triggering friend update from FriendRequests (accept)');
+        onFriendUpdate();
+      }
     } catch (error) {
       setError('Failed to accept request');
     }
@@ -37,6 +43,12 @@ const FriendRequests = ({ walletAddress, onClose }) => {
       await respondToFriendRequest(connectionId, 'rejected');
       // Remove the request from the list
       setPendingRequests(pendingRequests.filter(req => req._id !== connectionId));
+      
+      // Trigger friend update event
+      if (onFriendUpdate && typeof onFriendUpdate === 'function') {
+        console.log('Triggering friend update from FriendRequests (reject)');
+        onFriendUpdate();
+      }
     } catch (error) {
       setError('Failed to reject request');
     }

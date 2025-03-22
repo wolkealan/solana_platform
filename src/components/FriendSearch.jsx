@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { sendFriendRequest } from '../services/connectionService';
 import '../styles/FriendSearch.css';
 
-const FriendSearch = ({ walletAddress, onClose }) => {
+const FriendSearch = ({ walletAddress, onClose, onFriendUpdate }) => {
   const [searchWallet, setSearchWallet] = useState('');
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
@@ -29,6 +29,12 @@ const FriendSearch = ({ walletAddress, onClose }) => {
       await sendFriendRequest(walletAddress, searchWallet);
       setStatus('Friend request sent successfully!');
       setSearchWallet('');
+      
+      // Trigger update for sent requests if needed
+      if (onFriendUpdate && typeof onFriendUpdate === 'function') {
+        console.log('Triggering friend update from FriendSearch');
+        onFriendUpdate();
+      }
     } catch (error) {
       if (error.message?.includes('Connection already exists')) {
         setError('You already have a connection with this wallet');

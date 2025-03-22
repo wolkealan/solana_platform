@@ -1,5 +1,6 @@
 import api from './api';
 import io from 'socket.io-client';
+import { friendEvents } from '../components/SocialMenu';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
 let socket = null;
@@ -24,6 +25,22 @@ export const initializeSocket = (walletAddress) => {
 
     socket.on('messagesRead', (data) => {
       console.log('Received messagesRead:', data);
+    });
+
+    socket.on('newFriendRequest', (requestData) => {
+      console.log('Received new friend request:', requestData);
+      // Could trigger UI notification here if needed
+    });
+
+    socket.on('friendRequestAccepted', (friendData) => {
+      console.log('Friend request accepted:', friendData);
+      // Trigger friend list update for both users
+      if (friendEvents && typeof friendEvents.emit === 'function') {
+        console.log('Emitting friend update event');
+        friendEvents.emit();
+      } else {
+        console.warn('friendEvents.emit is not available');
+      }
     });
 
     socket.on('disconnect', () => {

@@ -5,12 +5,21 @@ import { Physics, RigidBody, CuboidCollider } from '@react-three/rapier';
 import { ConvaiFPS } from './fps/convaiFPS';
 import { Anita } from './models/Anita';
 import { DualAnimatedCharacter } from './models/DualAnimatedCharacter';
+import { RpmGirl } from './models/RpmGirl';
+import { RpmGirl2 } from './models/RpmGirl2';
+import { RpmGirl3 } from './models/RpmGirl3';
+import { RpmGirl4 } from './models/RpmGirl4';
+import { RpmGirl5 } from './models/RpmGirl5';
+import { RpmSigma } from './models/RpmSigma';
+import { RpmOrangie } from './models/RpmOrangie';
+import { RpmCharacter2 } from './models/RpmCharacter2';
+import { RpmTrump } from './models/RpmTrump';
+import { RpmNig } from './models/RpmNig';
 import { FriendCharacter } from './models/FriendCharacter';
 import { getFriends } from '../services/connectionService';
 import { friendEvents } from './SocialMenu';
 import { Color } from 'three';
 
-// Remove client from the props
 export const Experience = ({ characterType, walletAddress, onLockChange }) => {
   const [gravity, setGravity] = useState([0, 0, 0]);
   const [friends, setFriends] = useState([]);
@@ -47,10 +56,29 @@ export const Experience = ({ characterType, walletAddress, onLockChange }) => {
     console.log('Rendering character:', characterType);
     switch (characterType) {
       case 'rpm':
-        // Remove client prop from components
         return <DualAnimatedCharacter position={[0, 0, 0]} />;
       case 'anita':
         return <Anita position={[0, 0, 0]} />;
+      case 'rpmgirl':
+        return <RpmGirl position={[0, 0, 0]} />;
+      case 'rpmgirl2':
+        return <RpmGirl2 position={[0, 0, 0]} />;
+      case 'rpmgirl3':
+        return <RpmGirl3 position={[0, 0, 0]} />;
+      case 'rpmgirl4':
+        return <RpmGirl4 position={[0, 0, 0]} />;
+      case 'rpmgirl5':
+        return <RpmGirl5 position={[0, 0, 0]} />;
+      case 'rpmsigma':
+        return <RpmSigma position={[0, 0, 0]} />;
+      case 'rpmorangie':
+        return <RpmOrangie position={[0, 0, 0]} />;
+      case 'rpmcharacter2':
+        return <RpmCharacter2 position={[0, 0, 0]} />;
+      case 'rpmtrump':
+        return <RpmTrump position={[0, 0, 0]} />;
+      case 'rpmnig':
+        return <RpmNig position={[0, 0, 0]} />;
       default:
         console.warn('Unknown character type:', characterType);
         return <DualAnimatedCharacter position={[0, 0, 0]} />;

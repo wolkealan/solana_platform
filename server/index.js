@@ -3,8 +3,8 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
-const connectionRoutes = require('./routes/connectionRoutes');
-const messageRoutes = require('./routes/messageRoutes');
+const connectionRoutesFactory = require('./routes/connectionRoutes');
+const messageRoutesFactory = require('./routes/messageRoutes');
 const http = require('http');
 const { Server } = require('socket.io');
 
@@ -24,8 +24,8 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/users', userRoutes);
-app.use('/api/connections', connectionRoutes);
-app.use('/api/messages', messageRoutes(io)); // Pass io to messageRoutes
+app.use('/api/connections', connectionRoutesFactory(io)); // Pass io to connectionRoutes
+app.use('/api/messages', messageRoutesFactory(io)); // Pass io to messageRoutes
 
 io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);

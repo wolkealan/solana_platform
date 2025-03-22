@@ -8,15 +8,19 @@ import { getPendingRequests } from '../services/connectionService';
 import { getAllConversations, markMessagesAsRead, initializeSocket, disconnectSocket, addSocketEventListener } from '../services/messageService';
 import '../styles/SocialMenu.css';
 
+// Create a custom event system for friend updates
 export const friendEvents = {
   listeners: [],
   subscribe: (callback) => {
+    console.log('Subscribing to friend events');
     friendEvents.listeners.push(callback);
     return () => {
+      console.log('Unsubscribing from friend events');
       friendEvents.listeners = friendEvents.listeners.filter(cb => cb !== callback);
     };
   },
   emit: () => {
+    console.log(`Emitting friend update event to ${friendEvents.listeners.length} listeners`);
     friendEvents.listeners.forEach(callback => callback());
   },
 };
@@ -105,7 +109,9 @@ const SocialMenu = ({ walletAddress, isPointerLocked, onToggleLeaderboard }) => 
     setActiveChats(activeChats.filter(chat => chat.walletAddress !== friendWallet));
   };
 
+  // Friend update handler - this gets passed to all components that can trigger friend updates
   const onFriendUpdate = useCallback(() => {
+    console.log('Friend update triggered from SocialMenu');
     friendEvents.emit();
   }, []);
 
@@ -154,6 +160,7 @@ const SocialMenu = ({ walletAddress, isPointerLocked, onToggleLeaderboard }) => 
           walletAddress={walletAddress}
           onClose={() => setActivePanel(null)}
           onChatOpen={openChat}
+          onFriendUpdate={onFriendUpdate}
         />
       )}
       {activePanel === 'friends' && (
@@ -162,6 +169,7 @@ const SocialMenu = ({ walletAddress, isPointerLocked, onToggleLeaderboard }) => 
           onClose={() => setActivePanel(null)}
           onChatOpen={openChat}
           unreadMessages={unreadMessages}
+          onFriendUpdate={onFriendUpdate}
         />
       )}
       {activePanel === 'requests' && (
@@ -172,7 +180,11 @@ const SocialMenu = ({ walletAddress, isPointerLocked, onToggleLeaderboard }) => 
         />
       )}
       {activePanel === 'search' && (
-        <FriendSearch walletAddress={walletAddress} onClose={() => setActivePanel(null)} />
+        <FriendSearch 
+          walletAddress={walletAddress} 
+          onClose={() => setActivePanel(null)} 
+          onFriendUpdate={onFriendUpdate}
+        />
       )}
       {activeChats.map((friend, index) => (
         <ChatWindow
@@ -181,6 +193,7 @@ const SocialMenu = ({ walletAddress, isPointerLocked, onToggleLeaderboard }) => 
           friend={friend}
           onClose={() => closeChat(friend.walletAddress)}
           style={getChatPosition(index)}
+          onFriendUpdate={onFriendUpdate}
         />
       ))}
     </div>

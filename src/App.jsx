@@ -8,7 +8,7 @@ import { CharacterSelection } from './components/CharacterSelection';
 import './styles/WalletStyles.css';
 import { getUserByWallet, registerUser, updateUserCharacter } from './services/userService';
 import './styles/Registration.css';
-import SocialMenu from './components/SocialMenu';
+import SocialMenu, { friendEvents } from './components/SocialMenu'; // Import friendEvents
 import LeaderboardPage from './components/LeaderboardPage';
 import './styles/LoadingTransition.css';
 import LandingPage from './components/LandingPage'; // Import the landing page component
@@ -134,6 +134,16 @@ function App() {
     }
   };
 
+  // Handler for friend updates
+  const handleFriendUpdate = () => {
+    console.log("Friend update triggered from App");
+    if (friendEvents && typeof friendEvents.emit === 'function') {
+      friendEvents.emit();
+    } else {
+      console.warn("friendEvents.emit is not available");
+    }
+  };
+
   // Handler for Join Waitlist button on landing page
   const handleJoinWaitlist = () => {
     setShowLandingPage(false);
@@ -237,7 +247,7 @@ function App() {
             <LeaderboardPage 
               walletAddress={walletAddress} 
               onReturn={() => handleToggleLeaderboard(false)}
-              onFriendUpdate={() => {}}
+              onFriendUpdate={handleFriendUpdate}
             />
           ) : (
             <>
@@ -260,7 +270,6 @@ function App() {
                   }}
                 >
                   <Experience 
-                    // client={client} 
                     characterType={selectedCharacter}
                     walletAddress={walletAddress}
                     onLockChange={handlePointerLockChange}
